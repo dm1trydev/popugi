@@ -4,5 +4,7 @@ Rails.application.routes.draw do
 
   root to: 'accounts#index'
 
-  resources :accounts, only: %w[edit update]
+  resources :accounts, only: %i[index edit update] do
+    get :current, on: :collection
+  end
 end

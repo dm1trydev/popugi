@@ -10,7 +10,12 @@
   </head>
 
   <body>
-    <% if current_account.admin? %>
+    <% if current_account %>
+      <br/>
+      <%= link_to 'Log out', destroy_account_session_path, method: :delete %>
+      <br/>
+    <% end %>
+    <% if current_account&.admin? %>
       <%= link_to 'Add new service', new_oauth_application_path %>
     <% end %>
 

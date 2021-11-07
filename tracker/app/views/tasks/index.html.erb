@@ -1,0 +1,40 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Tasks</h1>
+
+<%= link_to 'New Task', new_task_path %>
+<br>
+
+<% if can_assign_tasks? %>
+  <%= link_to 'Assign tasks', assign_tasks_path, method: :post %>
+  <br>
+<% end %>
+<%= link_to 'My Tasks', my_tasks_path %>
+<br>
+
+<table>
+  <thead>
+  <tr>
+    <th>Public</th>
+    <th>Title</th>
+    <th>Description</th>
+    <th>Status</th>
+    <th>Account</th>
+    <th colspan="3"></th>
+  </tr>
+  </thead>
+
+  <tbody>
+  <% @tasks.each do |task| %>
+    <tr>
+      <td><%= task.public_id %></td>
+      <td><%= task.title %></td>
+      <td><%= task.description %></td>
+      <td><%= task.status %></td>
+      <td><%= task.account&.full_name %></td>
+      <td><%= link_to 'Show', task %></td>
+      <td><%= link_to 'Destroy', task, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
