@@ -10,6 +10,14 @@
   </head>
 
   <body>
+    <% if current_account %>
+      <%= link_to 'Logout', logout_path %>
+
+      <h2>Current account</h2>
+      <%= current_account.as_json %>
+      <br>
+    <% end %>
+
     <%= yield %>
   </body>
 </html>
