@@ -1,6 +1,6 @@
 class TasksController < ApplicationController
   before_action :authenticate!
-  before_action :set_task, only: [:show, :destroy, :close]
+  before_action :set_task, only: [:show, :destroy, :pour_millet_into_a_bowl]
   before_action :can_assign_tasks?, only: :assign_tasks
 
   # GET /tasks
@@ -42,24 +42,24 @@ class TasksController < ApplicationController
   end
 
   def assign_tasks
-    AssignTasksService.call(Task.open, Account.all)
+    CatchBirdService.call(Task.bird_in_a_cage, Account.all)
 
-    redirect_to tasks_path, notice: 'Tasks assigned.'
+    redirect_to tasks_path, notice: 'Bird caged.'
   end
 
   def my
     @tasks = Task.where(account_id: current_account.id)
   end
 
-  def close
-    if @task.may_close? && @task.close!
+  def pour_millet_into_a_bowl
+    if @task.may_pour_millet_into_a_bowl? && @task.pour_millet_into_a_bowl!
       # BE + CUD events
-      event = Event.new(name: 'Task.Closed', data: { public_id: @task.public_id })
+      event = Event.new(name: 'Task.MilledPoured', data: { public_id: @task.public_id })
 
-      validation = SchemaRegistry.validate_event(event.to_h.as_json, 'task.closed', version: 1)
+      validation = SchemaRegistry.validate_event(event.to_h.as_json, 'task.millet_poured', version: 1)
       WaterDrop::SyncProducer.call(event.to_json, topic: 'tasks') if validation.success?
 
-      redirect_to @task, notice: 'Task closed.'
+      redirect_to @task, notice: 'Millet poured into a bowl.'
     else
       render :show
     end
