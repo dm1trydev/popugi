@@ -16,7 +16,9 @@ class AssignTasksService
         performer_public_id: account.public_id
       }
       event = ::Event.new(name: 'Task.Assigned', data: event_data)
-      WaterDrop::SyncProducer.call(event.to_json, topic: 'tasks')
+
+      validation = SchemaRegistry.validate_event(event.to_h.as_json, 'task.assigned', version: 1)
+      WaterDrop::SyncProducer.call(event.to_json, topic: 'tasks') if validation.success?
 
       NotifyTaskAssigneeService.call(task)
     end

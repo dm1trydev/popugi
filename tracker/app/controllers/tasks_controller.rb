@@ -25,12 +25,15 @@ class TasksController < ApplicationController
       # CUD event
       event_data = {
         public_id: @task.reload.public_id,
+        jira_id: @task.jira_id,
         title: @task.title,
         description: @task.description,
         status: @task.status
       }
-      event = ::Event.new(name: 'Task.Created', data: event_data)
-      WaterDrop::SyncProducer.call(event.to_json, topic: 'tasks-stream')
+      event = ::Event.new(name: 'Task.Created', data: event_data, version: 2)
+
+      validation = SchemaRegistry.validate_event(event.to_h.as_json, 'task.created', version: 2)
+      WaterDrop::SyncProducer.call(event.to_json, topic: 'tasks-stream') if validation.success?
 
       redirect_to @task, notice: 'Task was successfully created.'
     else
@@ -52,7 +55,9 @@ class TasksController < ApplicationController
     if @task.may_close? && @task.close!
       # BE + CUD events
       event = Event.new(name: 'Task.Closed', data: { public_id: @task.public_id })
-      WaterDrop::SyncProducer.call(event.to_json, topic: 'tasks')
+
+      validation = SchemaRegistry.validate_event(event.to_h.as_json, 'task.closed', version: 1)
+      WaterDrop::SyncProducer.call(event.to_json, topic: 'tasks') if validation.success?
 
       redirect_to @task, notice: 'Task closed.'
     else
@@ -75,7 +80,7 @@ class TasksController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def task_params
-    params.require(:task).permit(:title, :description)
+    params.require(:task).permit(:jira_id, :title, :description)
   end
 
   def can_assign_tasks?
