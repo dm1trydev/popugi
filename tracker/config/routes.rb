@@ -6,10 +6,10 @@ Rails.application.routes.draw do
   get '/auth/:provider/callback', to: 'sessions#create'
 
   resources :tasks, only: %i[index show new create] do
-    post :close, on: :member
+    post :pour_millet_into_a_bowl, on: :member
 
     collection do
-      post :assign_tasks, as: :assign
+      post :catch_birds
       get :my
     end
   end

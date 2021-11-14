@@ -41,7 +41,7 @@ class TasksController < ApplicationController
     end
   end
 
-  def assign_tasks
+  def catch_birds
     CatchBirdService.call(Task.bird_in_a_cage, Account.all)
 
     redirect_to tasks_path, notice: 'Bird caged.'
@@ -54,7 +54,7 @@ class TasksController < ApplicationController
   def pour_millet_into_a_bowl
     if @task.may_pour_millet_into_a_bowl? && @task.pour_millet_into_a_bowl!
       # BE + CUD events
-      event = Event.new(name: 'Task.MilledPoured', data: { public_id: @task.public_id })
+      event = Event.new(name: 'Task.MilletPoured', data: { public_id: @task.public_id })
 
       validation = SchemaRegistry.validate_event(event.to_h.as_json, 'task.millet_poured', version: 1)
       WaterDrop::SyncProducer.call(event.to_json, topic: 'tasks') if validation.success?

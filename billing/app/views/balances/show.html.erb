@@ -1,0 +1,26 @@
+<h1><%= @balance.account.full_name %> balance</h1>
+
+<h1>Transactions</h1>
+
+<h3>Your balance is: <%= @balance.amount %></h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Created at</th>
+      <th>Task</th>
+      <th>Amount</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @balance.transactions.each do |transaction| %>
+      <tr>
+        <td><%= transaction.created_at.strftime('%d-%m-%Y %H:%M:%S') %></td>
+        <td><%= transaction.task&.title %></td>
+        <td style="color:<%= transaction.type == 'accrual' ? 'green' : 'red' %>"><%= transaction.amount %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
