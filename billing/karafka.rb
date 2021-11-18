@@ -41,6 +41,23 @@ class KarafkaApp < Karafka::App
   # )
 
   consumer_groups.draw do
+    consumer_group :billing_consumers do
+      topic 'accounts-stream' do
+        consumer AccountsChangesConsumer
+      end
+
+      topic 'accounts' do
+        consumer AccountsConsumer
+      end
+
+      topic 'tasks-stream' do
+        consumer TasksChangesConsumer
+      end
+
+      topic 'tasks' do
+        consumer TasksConsumer
+      end
+    end
   end
 end
 

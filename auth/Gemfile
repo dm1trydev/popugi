@@ -37,6 +37,7 @@ gem 'bootsnap', '>= 1.1.0', require: false
 gem 'devise'
 gem 'doorkeeper'
 gem 'waterdrop'
+gem "schema_registry", git: "https://github.com/davydovanton/event_schema_registry.git"
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

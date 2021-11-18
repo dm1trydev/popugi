@@ -25,13 +25,15 @@ class AccountsController < ApplicationController
           full_name: @account.full_name
         }
         event = ::Event.new(name: 'Account.Updated', data: event_data)
-        Producer.produce_sync(payload: event.to_json, topic: 'accounts-stream')
+        validation = SchemaRegistry.validate_event(payload, 'account.updated', version: 1)
+        Producer.produce_sync(payload: event.to_json, topic: 'accounts-stream') if validation.success?
 
         if new_role
           event_data = { public_id: @account.public_id, role: @account.role }
 
           event = ::Event.new(name: 'Account.RoleChanged', data: event_data)
-          Producer.produce_sync(payload: event.to_json, topic: 'accounts')
+          validation = SchemaRegistry.validate_event(payload, 'account.role_changed', version: 1)
+          Producer.produce_sync(payload: event.to_json, topic: 'accounts') if validation.success?
         end
 
         format.html { redirect_to root_path, notice: 'Account was successfully updated.' }
@@ -49,7 +51,8 @@ class AccountsController < ApplicationController
     event_data = { public_id: @account.public_id }
 
     event = ::Event.new(name: 'Account.Deleted', data: event_data)
-    Producer.produce_sync(payload: event.to_json, topic: 'accounts-stream')
+    validation = SchemaRegistry.validate_event(payload, 'account.deleted', version: 1)
+    Producer.produce_sync(payload: event.to_json, topic: 'accounts-stream') if validation.success?
 
     respond_to do |format|
       format.html { redirect_to root_path, notice: 'Account was successfully destroyed.' }

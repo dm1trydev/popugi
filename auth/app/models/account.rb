@@ -33,6 +33,8 @@ class Account < ApplicationRecord
     }
 
     event = ::Event.new(name: 'Account.Created', data: event_data)
-    Producer.produce_sync(payload: event.to_json, topic: 'accounts-stream')
+
+    validation = SchemaRegistry.validate_event(payload, 'account.created', version: 1)
+    Producer.produce_sync(payload: event.to_json, topic: 'accounts-stream') if validation.success?
   end
 end
