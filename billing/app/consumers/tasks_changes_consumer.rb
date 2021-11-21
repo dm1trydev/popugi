@@ -4,10 +4,11 @@ class TasksChangesConsumer < ApplicationConsumer
       payload = message.payload
 
       case [payload['event_name'], payload['event_version']]
-      when ['Task.Created', 1]
+      when ['Task.Created', 2]
         validation = SchemaRegistry.validate_event(payload, 'task.created', version: payload['event_version'])
+        raise StandardError, "Event validation failed:\n#{validation.failure.join("\n")}" if validation.failure?
 
-        create(payload['data']) if validation.success?
+        create(payload['data'])
       else
         # store in db
       end
@@ -17,20 +18,30 @@ class TasksChangesConsumer < ApplicationConsumer
   private
 
   def create(data)
-    amount = rand(20..40)
-    fee = rand(-20..-10)
-    task_params = data.to_h.merge(amount: amount, fee: fee, balance_cycle_id: BalanceCycle.current_cycle.id)
+    Task.transaction do
+      amount = rand(20..40)
+      fee = rand(10..20)
+      performer = Account.find_by!(public_id: data['performer_public_id'])
 
-    task = Task.create!(task_params)
+      task_params = data.to_h.except('performer_public_id')
+      task_params = task_params.merge(amount: amount,
+                                      fee: fee,
+                                      account_id: performer.id,
+                                      balance_cycle_id: BalanceCycle.current_cycle.id)
 
-    event_data = {
-      public_id: task.public_id,
-      amount: amount,
-      fee: fee
-    }
-    event = Event.new(name: 'Task.PriceSet', data: event_data)
-    if SchemaRegistry.validate_event(event.to_json, 'tasks.price_set', version: 1).success?
-      Producer.produce_sync(payload: event.to_json, topic: 'tasks')
+      task = Task.create!(task_params)
+
+      event_data = {
+        public_id: task.public_id,
+        amount: amount,
+        fee: fee
+      }
+      event = Event.new(name: 'Task.Updated', data: event_data)
+
+      validation = SchemaRegistry.validate_event(event.to_json, 'task.updated', version: 1)
+      raise StandardError, "Event validation failed:\n#{validation.failure.join("\n")}" if validation.failure?
+
+      WaterDrop::SyncProducer.call(event.to_json, topic: 'tasks-stream')
     end
   end
 end

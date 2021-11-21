@@ -12,14 +12,16 @@
         "public_id": { "type":  "string" },
         "title": { "type":  "string" },
         "description": { "type":  "string" },
-        "status": { "type":  "string" }
+        "status": { "type":  "string" },
+        "performer_public_id": { "type": "string" }
       },
       "required": [
         "jira_id",
         "public_id",
         "title",
         "description",
-        "status"
+        "status",
+        "performer_public_id"
       ]
     }
   },
@@ -28,7 +30,7 @@
 
   "properties": {
     "event_id":      { "type": "string" },
-    "event_version": { "enum": [1] },
+    "event_version": { "enum": [2] },
     "event_name":    { "type": "string" },
     "event_time":    { "type": "string" },
     "producer":      { "type": "string" },

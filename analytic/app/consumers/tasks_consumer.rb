@@ -35,7 +35,6 @@ class TasksConsumer < ApplicationConsumer
       task = Task.find_by_public_id!(payload['data']['public_id'])
       account = Account.find_by_public_id!(payload['data']['performer_public_id'])
       catch_bird(task, account)
-      decrease_account_balance(task, account)
     end
   end
 
@@ -43,37 +42,7 @@ class TasksConsumer < ApplicationConsumer
     ApplicationRecord.transaction do
       task = Task.find_by_public_id!(payload['data']['public_id'])
       pour_millet(task)
-      increase_account_balance(task, task.account)
     end
-  end
-
-  def decrease_account_balance(task, account)
-    change_balance(task, account, task.fee, 'withdrawal')
-  end
-
-  def increase_account_balance(task, account)
-    change_balance(task, account, task.amount, 'accrual')
-  end
-
-  def change_balance(task, account, amount, type)
-    transaction =
-      account
-        .balance
-        .transactions
-        .create!(task_id: task.id, amount: amount, kind: type, balance_cycle_id: BalanceCycle.current_cycle.id)
-
-    description = transaction.withdrawal? ? 'bird in a cage' : 'millet in a bowl'
-    ProcessTransactionService.new(transaction, description).call
-
-    case type
-    when 'accrual'
-      account.balance.amount += amount
-    when 'withdrawal'
-      account.balance.amount -= amount
-    else
-      raise StandardError, 'Unknown transaction type!'
-    end
-    account.balance.save!
   end
 
   def catch_bird(task, account)

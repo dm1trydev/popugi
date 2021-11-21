@@ -6,7 +6,7 @@ class BalanceCycle < ApplicationRecord
   enum state: { open: 'open', closed: 'closed' }
 
   validates :closed_at, presence: true, if: :closed?
-  validate :can_be_only_one_open_cycle
+  before_create :can_be_only_one_open_cycle
 
   before_create do
     self.opened_at = Time.current

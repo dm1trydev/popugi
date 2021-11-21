@@ -9,15 +9,26 @@
       "type": "object",
       "properties": {
         "public_id": { "type":  "string" },
-        "amount": { "type":  "number" },
+        "amount": { "type":  "string" },
         "type": { "enum":  ["accrual", "withdrawal"] },
-        "owner_public_id": { "type": "string" }
+        "owner_public_id": { "type": "string" },
+        "reason": {
+          "type": "object",
+          "properties": {
+            "description": { "type": "string" },
+            "task_public_id": { "type":  "string" }
+          },
+          "required": [
+            "description"
+          ]
+        }
       },
       "required": [
         "public_id",
         "amount",
         "type",
-        "owner_public_id"
+        "owner_public_id",
+        "reason"
       ]
     }
   },

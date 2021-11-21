@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_13_134516) do
+ActiveRecord::Schema.define(version: 2021_11_18_173431) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -26,16 +26,33 @@ ActiveRecord::Schema.define(version: 2021_11_13_134516) do
   end
 
   create_table "tasks", force: :cascade do |t|
-    t.uuid "public_id", default: -> { "gen_random_uuid()" }, null: false
+    t.uuid "public_id", null: false
     t.string "title"
     t.string "jira_id"
     t.text "description"
     t.string "status"
+    t.decimal "fee"
+    t.decimal "amount"
     t.bigint "account_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_tasks_on_account_id"
   end
 
+  create_table "transactions", force: :cascade do |t|
+    t.uuid "public_id", null: false
+    t.decimal "amount", null: false
+    t.string "kind", null: false
+    t.string "reason"
+    t.bigint "account_id"
+    t.bigint "task_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_transactions_on_account_id"
+    t.index ["task_id"], name: "index_transactions_on_task_id"
+  end
+
   add_foreign_key "tasks", "accounts"
+  add_foreign_key "transactions", "accounts"
+  add_foreign_key "transactions", "tasks"
 end

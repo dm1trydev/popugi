@@ -6,7 +6,9 @@ class AccountsConsumer < ApplicationConsumer
       case [payload['event_name'], payload['event_version']]
       when ['Account.RoleChanged', 1]
         validation = SchemaRegistry.validate_event(payload, 'account.role_changed', version: payload['event_version'])
-        change_role(payload['data']) if validation
+        raise StandardError, "Event validation failed:\n#{validation.failure.join("\n")}" if validation.failure?
+
+        change_role(payload['data'])
       else
         # store event in DB
       end

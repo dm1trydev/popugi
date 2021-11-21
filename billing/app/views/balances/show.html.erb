@@ -18,7 +18,7 @@
       <tr>
         <td><%= transaction.created_at.strftime('%d-%m-%Y %H:%M:%S') %></td>
         <td><%= transaction.task&.title %></td>
-        <td style="color:<%= transaction.type == 'accrual' ? 'green' : 'red' %>"><%= transaction.amount %></td>
+        <td style="color:<%= transaction.kind == 'accrual' ? 'green' : 'red' %>"><%= transaction.amount %></td>
       </tr>
     <% end %>
   </tbody>

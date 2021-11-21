@@ -28,13 +28,14 @@ class Account < ApplicationRecord
     event_data = {
       public_id: public_id,
       email: email,
-      full_name: full_name,
       role: role
     }
 
     event = ::Event.new(name: 'Account.Created', data: event_data)
 
-    validation = SchemaRegistry.validate_event(payload, 'account.created', version: 1)
-    Producer.produce_sync(payload: event.to_json, topic: 'accounts-stream') if validation.success?
+    validation = SchemaRegistry.validate_event(event.to_h.as_json, 'account.created', version: 1)
+    raise StandardError, "Event validation failed:\n#{validation.failure.join("\n")}" if validation.failure?
+
+    Producer.produce_sync(payload: event.to_json, topic: 'accounts-stream')
   end
 end
