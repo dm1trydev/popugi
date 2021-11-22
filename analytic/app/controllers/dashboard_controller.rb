@@ -2,10 +2,7 @@ class DashboardController < ApplicationController
   before_action :calculate_income_and_poor_parrots
 
   def index
-    p '*' * 100
     @most_expensive_task = most_expensive_task
-    p most_expensive_task
-    p '*' * 100
   end
 
   private
