@@ -19,7 +19,8 @@ class TasksController < ApplicationController
 
   # POST /tasks
   def create
-    @task = Task.new(task_params.merge(account_id: Account.all.sample.id))
+    performer = Account.all.sample
+    @task = Task.new(task_params.merge(account_id: performer.id))
 
     if @task.save
       # CUD event
@@ -28,12 +29,22 @@ class TasksController < ApplicationController
         jira_id: @task.jira_id,
         title: @task.title,
         description: @task.description,
-        status: @task.status
+        status: @task.status,
+        performer_public_id: performer.public_id
       }
       event = ::Event.new(name: 'Task.Created', data: event_data, version: 2)
 
       validation = SchemaRegistry.validate_event(event.to_h.as_json, 'task.created', version: 2)
-      WaterDrop::SyncProducer.call(event.to_json, topic: 'tasks-stream') if validation.success?
+      raise StandardError, "Event validation failed:\n#{validation.failure.join("\n")}" if validation.failure?
+
+      WaterDrop::SyncProducer.call(event.to_json, topic: 'tasks-stream')
+
+      event_data = { public_id: @task.public_id, performer_public_id: performer.public_id }
+      event = ::Event.new(name: 'Task.BirdCaught', data: event_data)
+
+      validation = SchemaRegistry.validate_event(event.to_h.as_json, 'task.bird_caught', version: 1)
+      raise StandardError, "Event validation failed:\n#{validation.failure.join("\n")}" if validation.failure?
+      WaterDrop::SyncProducer.call(event.to_json, topic: 'tasks')
 
       redirect_to @task, notice: 'Task was successfully created.'
     else
@@ -57,7 +68,9 @@ class TasksController < ApplicationController
       event = Event.new(name: 'Task.MilletPoured', data: { public_id: @task.public_id })
 
       validation = SchemaRegistry.validate_event(event.to_h.as_json, 'task.millet_poured', version: 1)
-      WaterDrop::SyncProducer.call(event.to_json, topic: 'tasks') if validation.success?
+      raise StandardError, "Event validation failed:\n#{validation.failure.join("\n")}" if validation.failure?
+
+      WaterDrop::SyncProducer.call(event.to_json, topic: 'tasks')
 
       redirect_to @task, notice: 'Millet poured into a bowl.'
     else

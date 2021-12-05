@@ -6,10 +6,14 @@ class AccountChangesConsumer < ApplicationConsumer
       case [payload['event_name'], payload['event_version']]
       when ['Account.Created', 1]
         validation = SchemaRegistry.validate_event(payload, 'account.created', version: payload['event_version'])
-        create(payload['data']) if validation.success?
+        raise StandardError, "Event validation failed:\n#{validation.failure.join("\n")}" if validation.failure?
+
+        create(payload['data'])
       when ['Account.Updated', 1]
         validation = SchemaRegistry.validate_event(payload, 'account.updated', version: payload['event_version'])
-        update(payload['data']) if validation.success?
+        raise StandardError, "Event validation failed:\n#{validation.failure.join("\n")}" if validation.failure?
+
+        update(payload['data'])
       else
         # store event in DB
       end

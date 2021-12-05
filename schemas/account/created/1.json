@@ -10,13 +10,11 @@
       "properties": {
         "public_id": { "type":  "string" },
         "email": { "type":  "string" },
-        "full_name": { "type":  "string" },
         "role": { "type":  "string" }
       },
       "required": [
         "public_id",
         "email",
-        "full_name",
         "role"
       ]
     }

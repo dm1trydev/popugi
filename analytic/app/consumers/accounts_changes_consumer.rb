@@ -27,10 +27,7 @@ class AccountsChangesConsumer < ApplicationConsumer
 
     return if account.present?
 
-    Account.transaction do
-      account = Account.create!(data)
-      account.create_balance!
-    end
+    Account.create!(data)
   end
 
   def update(data)

@@ -1,6 +1,4 @@
 class SessionsController < ApplicationController
-  def new; end
-
   def create
     account = Account.find_by(public_id: auth_hash['info']['public_id'])
     session[:account] = account

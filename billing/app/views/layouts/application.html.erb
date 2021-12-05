@@ -10,6 +10,24 @@
   </head>
 
   <body>
+
+    <% if current_account %>
+      <br/>
+      <%= link_to 'Logout', logout_path %>
+
+      <h2>Current account</h2>
+      <%= current_account.as_json %>
+      <br/>
+
+      <% if current_account.admin? %>
+        <h3>Current balance cycle</h3>
+        <%= BalanceCycle.current_cycle.as_json %>
+        <br/>
+        <%= link_to 'Close cycle', close_balance_cycles_path, method: :post %>
+      <br/>
+      <% end %>
+    <% end %>
+
     <%= yield %>
   </body>
 </html>
